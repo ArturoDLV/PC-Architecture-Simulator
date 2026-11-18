@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="PCArchitectureSimulator.Console/PCArchitectureSimulator.Console.csproj" />
+  <Project Path="PCArchitectureSimulator.Core/PCArchitectureSimulator.Core.csproj" />
+  <Project Path="PCArchitectureSimulator.Desktop/PCArchitectureSimulator.Desktop.csproj" />
+</Solution>
