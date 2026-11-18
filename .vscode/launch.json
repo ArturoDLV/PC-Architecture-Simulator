@@ -1,0 +1,11 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Avalonia: PC Architecture Simulator",
+            "type": "dotnet",
+            "request": "launch",
+            "projectPath": "${workspaceFolder}/PC Architecture Simulator.csproj"
+        }
+    ]
+}

@@ -1,5 +1,7 @@
-﻿using Avalonia;
-using System;
+﻿global using System;
+global using System.Collections.Generic;
+
+using Avalonia;
 
 namespace PC_Architecture_Simulator;
 

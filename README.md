@@ -1,7 +1,6 @@
 # PC Architecture Simulator
-## College Degree Thesis Component
 
----
+## College Degree Thesis Component
 
 * **Author:** Ignacio Arturo de la Vega.
 * **Subject:** Computer Organization and Architecture.
