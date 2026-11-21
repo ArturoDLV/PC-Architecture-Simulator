@@ -1,6 +1,4 @@
-﻿global using System;
-global using System.Collections.Generic;
-
+﻿using System;
 using Avalonia;
 
 namespace PC_Architecture_Simulator;

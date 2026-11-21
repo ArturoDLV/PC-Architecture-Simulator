@@ -1,6 +1,7 @@
 public static class LogicFunctions
 {
-    public static LogicState[] AND(LogicState[] Inputs)
+    public static readonly LogicDefinition AND = new LogicDefinition("AND", 2, int.MaxValue, 1, ANDMapping);
+    private static void ANDMapping(ReadOnlySpan<LogicState> Inputs, Span<LogicState> Outputs)
     {
         bool hasUndefined = false;
 
@@ -8,7 +9,8 @@ public static class LogicFunctions
         {
             if (input == LogicState.Low)
             {
-                return [LogicState.Low];
+                Outputs[0] = LogicState.Low;
+                return;
             }
             
             if (input == LogicState.Undefined || input == LogicState.HighImpedance)
@@ -17,10 +19,12 @@ public static class LogicFunctions
             }
         }
 
-        return [hasUndefined ? LogicState.Undefined : LogicState.High];
+        Outputs[0] = hasUndefined ? LogicState.Undefined : LogicState.High;
+        return;
     }
 
-    public static LogicState[] OR(LogicState[] Inputs)
+    public static readonly LogicDefinition OR = new LogicDefinition("OR", 2, int.MaxValue, 1, ORMapping);
+    private static void ORMapping(ReadOnlySpan<LogicState> Inputs, Span<LogicState> Outputs)
     {
         bool hasUndefined = false;
 
@@ -28,7 +32,8 @@ public static class LogicFunctions
         {
             if (input == LogicState.High)
             {
-                return [LogicState.High];
+                Outputs[0] = LogicState.High;
+                return;
             }
             
             if (input == LogicState.Undefined || input == LogicState.HighImpedance)
@@ -37,34 +42,59 @@ public static class LogicFunctions
             }
         }
 
-        return [hasUndefined ? LogicState.Undefined : LogicState.Low];
+        Outputs[0] = hasUndefined ? LogicState.Undefined : LogicState.Low;
+        return;
     }
 
-    public static LogicState[] NOT(LogicState[] Inputs)
+    public static readonly LogicDefinition NOR = new LogicDefinition("NOR", 2, int.MaxValue, 1, NORMapping);
+    private static void NORMapping(ReadOnlySpan<LogicState> Inputs, Span<LogicState> Outputs)
     {
-        if (Inputs.Length != 1)
+        bool hasUndefined = false;
+
+        foreach (LogicState input in Inputs)
         {
-            throw new ArgumentException("NOT function requires exactly one input.");
+            if (input == LogicState.High)
+            {
+                Outputs[0] = LogicState.Low;
+                return;
+            }
+            
+            if (input == LogicState.Undefined || input == LogicState.HighImpedance)
+            {
+                hasUndefined = true;
+            }
         }
 
+        Outputs[0] = hasUndefined ? LogicState.Undefined : LogicState.High;
+        return;
+    }
+
+    public static readonly LogicDefinition NOT = new LogicDefinition("NOT", 1, 1, 1, NOTMapping);
+    private static void NOTMapping(ReadOnlySpan<LogicState> Inputs, Span<LogicState> Outputs)
+    {
         LogicState input = Inputs[0];
+        
         switch (input)
         {
             case LogicState.Low:
             {
-                return [LogicState.High];
+                Outputs[0] = LogicState.High;
+                return;
             }
             case LogicState.High:
             {
-                return [LogicState.Low];
+                Outputs[0] = LogicState.Low;
+                return;
             }
             case LogicState.Undefined:
             {
-                return [LogicState.Undefined];
+                Outputs[0] = LogicState.Undefined;
+                return;
             }
             case LogicState.HighImpedance:
             {
-                return [LogicState.HighImpedance];
+                Outputs[0] = LogicState.HighImpedance;
+                return;
             }
             default:
             {

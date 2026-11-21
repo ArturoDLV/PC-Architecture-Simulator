@@ -1,6 +1,6 @@
-public class ComponentDelay(float Delay)
+public class ComponentDelay(float DelayNanoseconds)
 {
-    private readonly float Delay = Delay;
+    private readonly float Delay = DelayNanoseconds;
     private float ElapsedTime = 0;
 
     public bool TryTrigger(float TickTime)

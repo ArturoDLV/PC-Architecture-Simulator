@@ -1,1 +1,0 @@
-public readonly record struct Entity(int ID);
