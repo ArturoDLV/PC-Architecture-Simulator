@@ -1,58 +1,39 @@
-using System.Collections.Immutable;
-
-public class ComponentLogic
+public sealed class ComponentLogic
 {
-    private readonly ImmutableArray<Node> Inputs;
-    private readonly ImmutableArray<Node> Outputs;
-    private readonly LogicDefinition Logic;
+    public readonly string Name;
+    public readonly int MinInputs;
+    public readonly int MaxInputs;
+    public readonly int OutputCount;
+    public readonly LogicMapping Mapping;
 
-    private readonly LogicState[] InputBuffer;
-    private readonly LogicState[] OutputBuffer;
-
-    public ComponentLogic(Node[] Inputs, Node[] Outputs, LogicDefinition Logic)
+    public ComponentLogic(string Name, int MinInputs, int MaxInputs, int OutputCount, LogicMapping Mapping)
     {
-        ArgumentNullException.ThrowIfNull(Inputs, nameof(Inputs));
-        ArgumentNullException.ThrowIfNull(Outputs, nameof(Outputs));
-        ArgumentNullException.ThrowIfNull(Logic, nameof(Logic));
+        ArgumentNullException.ThrowIfNull(Mapping, nameof(Mapping));
 
-        ImmutableArray<Node> inputsCopy = ImmutableArray.Create(Inputs);
-        ImmutableArray<Node> outputsCopy = ImmutableArray.Create(Outputs);
-
-        if (inputsCopy.Length == 0 || outputsCopy.Length == 0)
+        if (string.IsNullOrWhiteSpace(Name))
         {
-            throw new ArgumentException("Inputs and Outputs cannot be empty.");
+            throw new ArgumentException("Name cannot be empty.", nameof(Name));
         }
 
-        if (inputsCopy.Length < Logic.MinInputs || inputsCopy.Length > Logic.MaxInputs)
+        if (MinInputs < 1)
         {
-            throw new ArgumentException($"{Logic.Name} requires {Logic.MinInputs} to {Logic.MaxInputs} inputs. Got {inputsCopy.Length}.", nameof(Inputs));
+            throw new ArgumentOutOfRangeException(nameof(MinInputs), "Must have at least one input.");
         }
 
-        if (outputsCopy.Length != Logic.OutputCount)
+        if (MaxInputs < MinInputs)
         {
-            throw new ArgumentException($"{Logic.Name} requires exactly {Logic.OutputCount} outputs. Got {outputsCopy.Length}.", nameof(Outputs));
+            throw new ArgumentException(String.Format("Max inputs {0} is smaller than min inputs {1}", MaxInputs, MinInputs));
         }
 
-        this.Inputs = inputsCopy;
-        this.Outputs = outputsCopy;
-        this.Logic = Logic;
-
-        InputBuffer = new LogicState[Inputs.Length];
-        OutputBuffer = new LogicState[Outputs.Length];
-    }
-
-    public void Update()
-    {
-        for (int i = 0; i < Inputs.Length; i++)
+        if (OutputCount < 1)
         {
-            InputBuffer[i] = Inputs[i].State;
+            throw new ArgumentOutOfRangeException(nameof(OutputCount), "Must have at least one output.");
         }
 
-        Logic.Mapping(InputBuffer, OutputBuffer);
-
-        for (int i = 0; i < Outputs.Length; i++)
-        {
-            Outputs[i].State = OutputBuffer[i];
-        }
+        this.Name = Name;
+        this.MinInputs = MinInputs;
+        this.MaxInputs = MaxInputs;
+        this.OutputCount = OutputCount;
+        this.Mapping = Mapping;
     }
 }

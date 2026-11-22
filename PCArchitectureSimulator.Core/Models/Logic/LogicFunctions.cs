@@ -1,6 +1,6 @@
 public static class LogicFunctions
 {
-    public static readonly LogicDefinition AND = new LogicDefinition("AND", 2, int.MaxValue, 1, ANDMapping);
+    public static readonly ComponentLogic AND = new ComponentLogic("AND", 2, int.MaxValue, 1, ANDMapping);
     private static void ANDMapping(ReadOnlySpan<LogicState> Inputs, Span<LogicState> Outputs)
     {
         bool hasUndefined = false;
@@ -23,7 +23,7 @@ public static class LogicFunctions
         return;
     }
 
-    public static readonly LogicDefinition OR = new LogicDefinition("OR", 2, int.MaxValue, 1, ORMapping);
+    public static readonly ComponentLogic OR = new ComponentLogic("OR", 2, int.MaxValue, 1, ORMapping);
     private static void ORMapping(ReadOnlySpan<LogicState> Inputs, Span<LogicState> Outputs)
     {
         bool hasUndefined = false;
@@ -46,7 +46,30 @@ public static class LogicFunctions
         return;
     }
 
-    public static readonly LogicDefinition NOR = new LogicDefinition("NOR", 2, int.MaxValue, 1, NORMapping);
+    public static readonly ComponentLogic NAND = new ComponentLogic("NAND", 2, int.MaxValue, 1, NANDMapping);
+    private static void NANDMapping(ReadOnlySpan<LogicState> Inputs, Span<LogicState> Outputs)
+    {
+        bool hasUndefined = false;
+
+        foreach (LogicState input in Inputs)
+        {
+            if (input == LogicState.Low)
+            {
+                Outputs[0] = LogicState.High;
+                return;
+            }
+            
+            if (input == LogicState.Undefined || input == LogicState.HighImpedance)
+            {
+                hasUndefined = true;
+            }
+        }
+
+        Outputs[0] = hasUndefined ? LogicState.Undefined : LogicState.Low;
+        return;
+    }
+
+    public static readonly ComponentLogic NOR = new ComponentLogic("NOR", 2, int.MaxValue, 1, NORMapping);
     private static void NORMapping(ReadOnlySpan<LogicState> Inputs, Span<LogicState> Outputs)
     {
         bool hasUndefined = false;
@@ -69,7 +92,7 @@ public static class LogicFunctions
         return;
     }
 
-    public static readonly LogicDefinition NOT = new LogicDefinition("NOT", 1, 1, 1, NOTMapping);
+    public static readonly ComponentLogic NOT = new ComponentLogic("NOT", 1, 1, 1, NOTMapping);
     private static void NOTMapping(ReadOnlySpan<LogicState> Inputs, Span<LogicState> Outputs)
     {
         LogicState input = Inputs[0];
@@ -93,12 +116,13 @@ public static class LogicFunctions
             }
             case LogicState.HighImpedance:
             {
-                Outputs[0] = LogicState.HighImpedance;
+                Outputs[0] = LogicState.Undefined;
                 return;
             }
             default:
             {
-                throw new ArgumentOutOfRangeException();
+                // Should never trigger
+                throw new ArgumentOutOfRangeException(nameof(Inputs), "Invalid logic state");
             }
         }
     }
