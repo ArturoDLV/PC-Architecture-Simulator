@@ -11,8 +11,8 @@ ComponentOutputs outputs1 = new ComponentOutputs(ImmutableArray.Create([Q]));
 ComponentInputs inputs2 = new ComponentInputs(ImmutableArray.Create([S, Q]));
 ComponentOutputs outputs2 = new ComponentOutputs(ImmutableArray.Create([Qn]));
 
-SimulatorSystem.CreateLogicDevice(delay, inputs1, outputs1, LogicFunctions.NOR);
-SimulatorSystem.CreateLogicDevice(delay, inputs2, outputs2, LogicFunctions.NOR);
+EntityManager.CreateLogicDevice(delay, inputs1, outputs1, LogicFunctions.NOR);
+EntityManager.CreateLogicDevice(delay, inputs2, outputs2, LogicFunctions.NOR);
 
 Console.WriteLine();
 
@@ -27,7 +27,9 @@ PrintState("Tick: 3; Low S");
 SimulatorSystem.AdvanceByTick(1);
 PrintState("Tick: 4");
 
+SetWhite();
 Console.WriteLine();
+Console.ReadLine();
 
 void PrintState(string State)
 {
