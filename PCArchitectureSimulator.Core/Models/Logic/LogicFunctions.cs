@@ -3,7 +3,7 @@ public static class LogicFunctions
     public static readonly ComponentLogic AND = new ComponentLogic("AND", 2, int.MaxValue, 1, ANDMapping);
     private static void ANDMapping(ReadOnlySpan<LogicState> Inputs, Span<LogicState> Outputs)
     {
-        bool hasUndefined = false;
+        bool hasHighImpedance = false;
 
         foreach (LogicState input in Inputs)
         {
@@ -13,20 +13,20 @@ public static class LogicFunctions
                 return;
             }
             
-            if (input == LogicState.Undefined || input == LogicState.HighImpedance)
+            if (input == LogicState.HighImpedance)
             {
-                hasUndefined = true;
+                hasHighImpedance = true;
             }
         }
 
-        Outputs[0] = hasUndefined ? LogicState.Undefined : LogicState.High;
+        Outputs[0] = hasHighImpedance ? LogicState.HighImpedance : LogicState.High;
         return;
     }
 
     public static readonly ComponentLogic OR = new ComponentLogic("OR", 2, int.MaxValue, 1, ORMapping);
     private static void ORMapping(ReadOnlySpan<LogicState> Inputs, Span<LogicState> Outputs)
     {
-        bool hasUndefined = false;
+        bool hasHighImpedance = false;
 
         foreach (LogicState input in Inputs)
         {
@@ -36,20 +36,20 @@ public static class LogicFunctions
                 return;
             }
             
-            if (input == LogicState.Undefined || input == LogicState.HighImpedance)
+            if (input == LogicState.HighImpedance)
             {
-                hasUndefined = true;
+                hasHighImpedance = true;
             }
         }
 
-        Outputs[0] = hasUndefined ? LogicState.Undefined : LogicState.Low;
+        Outputs[0] = hasHighImpedance ? LogicState.HighImpedance : LogicState.Low;
         return;
     }
 
     public static readonly ComponentLogic NAND = new ComponentLogic("NAND", 2, int.MaxValue, 1, NANDMapping);
     private static void NANDMapping(ReadOnlySpan<LogicState> Inputs, Span<LogicState> Outputs)
     {
-        bool hasUndefined = false;
+        bool hasHighImpedance = false;
 
         foreach (LogicState input in Inputs)
         {
@@ -59,20 +59,20 @@ public static class LogicFunctions
                 return;
             }
             
-            if (input == LogicState.Undefined || input == LogicState.HighImpedance)
+            if (input == LogicState.HighImpedance)
             {
-                hasUndefined = true;
+                hasHighImpedance = true;
             }
         }
 
-        Outputs[0] = hasUndefined ? LogicState.Undefined : LogicState.Low;
+        Outputs[0] = hasHighImpedance ? LogicState.HighImpedance : LogicState.Low;
         return;
     }
 
     public static readonly ComponentLogic NOR = new ComponentLogic("NOR", 2, int.MaxValue, 1, NORMapping);
     private static void NORMapping(ReadOnlySpan<LogicState> Inputs, Span<LogicState> Outputs)
     {
-        bool hasUndefined = false;
+        bool hasHighImpedance = false;
 
         foreach (LogicState input in Inputs)
         {
@@ -82,13 +82,13 @@ public static class LogicFunctions
                 return;
             }
             
-            if (input == LogicState.Undefined || input == LogicState.HighImpedance)
+            if (input == LogicState.HighImpedance)
             {
-                hasUndefined = true;
+                hasHighImpedance = true;
             }
         }
 
-        Outputs[0] = hasUndefined ? LogicState.Undefined : LogicState.High;
+        Outputs[0] = hasHighImpedance ? LogicState.HighImpedance : LogicState.High;
         return;
     }
 
@@ -109,14 +109,9 @@ public static class LogicFunctions
                 Outputs[0] = LogicState.Low;
                 return;
             }
-            case LogicState.Undefined:
-            {
-                Outputs[0] = LogicState.Undefined;
-                return;
-            }
             case LogicState.HighImpedance:
             {
-                Outputs[0] = LogicState.Undefined;
+                Outputs[0] = LogicState.HighImpedance;
                 return;
             }
             default:

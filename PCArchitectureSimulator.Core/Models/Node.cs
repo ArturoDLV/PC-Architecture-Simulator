@@ -1,4 +1,4 @@
-public sealed class Node(LogicState InitialState = LogicState.Low)
+public sealed class Node(LogicState InitialState = LogicState.HighImpedance)
 {
     public LogicState State = InitialState;
 }

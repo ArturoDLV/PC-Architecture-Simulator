@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 public static class EntityManager
 {
     private static uint NextID = 0;
@@ -69,13 +71,22 @@ public static class EntityManager
         ComponentDictionaries.Logic.Add(ID, Logic);
         ComponentDictionaries.InputNodes.Add(ID, Inputs);
         ComponentDictionaries.OutputNodes.Add(ID, Outputs);
-        ComponentDictionaries.OutputTransition.Add(ID, new ComponentOutputTransition(Outputs.Outputs));
 
         LogicState[] iBuff = new LogicState[Inputs.Inputs.Length];
+        Queue<ComponentSignalQueue.Signal>[] queues = new Queue<ComponentSignalQueue.Signal>[Inputs.Inputs.Length];
+        LogicState[] arrived = new LogicState[Inputs.Inputs.Length];
+
         for (int i = 0; i < Inputs.Inputs.Length; i++)
         {
             iBuff[i] = Inputs.Inputs[i].State;
+            queues[i] = new Queue<ComponentSignalQueue.Signal>();
+            arrived[i] = Inputs.Inputs[i].State;
         }
+
+        ComponentDictionaries.InputBuffer.Add(ID, iBuff);
+        ImmutableArray<Queue<ComponentSignalQueue.Signal>> queuesImm = ImmutableArray.Create(queues);
+        ComponentDictionaries.SignalQueues.Add(ID, new ComponentSignalQueue.Q(queuesImm));
+        ComponentDictionaries.ReadySignals.Add(ID, arrived);
 
         LogicState[] oBuff = new LogicState[Outputs.Outputs.Length];
         for (int i = 0; i < Outputs.Outputs.Length; i++)
@@ -83,7 +94,6 @@ public static class EntityManager
             oBuff[i] = Outputs.Outputs[i].State;
         }
 
-        ComponentDictionaries.InputBuffer.Add(ID, iBuff);
         ComponentDictionaries.OutputBuffer.Add(ID, oBuff);
 
         EntityGroups.LogicDevice.Add(ID);
@@ -106,9 +116,10 @@ public static class EntityManager
             ComponentDictionaries.Logic.Remove(ID);
             ComponentDictionaries.InputNodes.Remove(ID);
             ComponentDictionaries.InputBuffer.Remove(ID);
+            ComponentDictionaries.SignalQueues.Remove(ID);
+            ComponentDictionaries.ReadySignals.Remove(ID);
             ComponentDictionaries.OutputNodes.Remove(ID);
             ComponentDictionaries.OutputBuffer.Remove(ID);
-            ComponentDictionaries.OutputTransition.Remove(ID);
 
             EntityGroups.LogicDevice.Remove(ID);
 
@@ -132,14 +143,14 @@ public static class EntityManager
         ArgumentNullException.ThrowIfNull(Input);
         ArgumentNullException.ThrowIfNull(Output);
 
-        if (Length <= 0)
+        if ((double.IsNaN(Length) == true) || (double.IsFinite(Length) == false) || (Length <= 0))
         {
-            throw new ArgumentOutOfRangeException(nameof(Length), "Length must be positive.");
+            throw new ArgumentOutOfRangeException(nameof(Length), "Length must be a positive number.");
         }
 
-        if (PropagationRate <= 0)
+        if ((double.IsNaN(PropagationRate) == true) || (double.IsFinite(PropagationRate) == false) || (PropagationRate <= 0))
         {
-            throw new ArgumentOutOfRangeException(nameof(PropagationRate), "Propagation rate must be positive.");
+            throw new ArgumentOutOfRangeException(nameof(PropagationRate), "Propagation rate must be a positive number.");
         }
 
         double wireDelay = (Length * PropagationRate);
@@ -147,6 +158,7 @@ public static class EntityManager
         {
             throw new ArgumentException(String.Format("Calculated wire delay is {0} picoseconds, which would round to 0 as the simulation works in discrete unit picosecond ticks.\nPlease provide a different length or propagation rate, or connect to a node directly.", wireDelay));
         }
+        long delay = (long)Math.Round(wireDelay);
 
         if (Input.Inputs.IsDefault == true)
         {
@@ -156,6 +168,7 @@ public static class EntityManager
         {
             throw new ArgumentException(nameof(Input), "Input must have exactly one component node.");
         }
+        ArgumentNullException.ThrowIfNull(Input.Inputs[0]);
 
         if (Output.Outputs.IsDefault == true)
         {
@@ -165,6 +178,7 @@ public static class EntityManager
         {
             throw new ArgumentException(nameof(Output), "Output must have exactly one component node.");
         }
+        ArgumentNullException.ThrowIfNull(Output.Outputs[0]);
 
         uint ID;
         if (FreedIDs.Count > 0)
@@ -177,15 +191,18 @@ public static class EntityManager
             NextID++;
         }
 
-        ComponentDictionaries.Delay.Add(ID, new ComponentDelay((long)Math.Round(wireDelay)));
-        ComponentDictionaries.SignalQueue.Add(ID, new ComponentSignalQueue());
+        ComponentDictionaries.Delay.Add(ID, new ComponentDelay(delay));
         ComponentDictionaries.InputNodes.Add(ID, Input);
         ComponentDictionaries.OutputNodes.Add(ID, Output);
 
-        LogicState[] iBuff = [Input.Inputs[0].State];
-        LogicState[] oBuff = [Output.Outputs[0].State];
-        ComponentDictionaries.InputBuffer.Add(ID, iBuff);
-        ComponentDictionaries.OutputBuffer.Add(ID, oBuff);
+        ComponentDictionaries.InputBuffer.Add(ID, [Input.Inputs[0].State]);
+
+        Queue<ComponentSignalQueue.Signal>[] queue = new Queue<ComponentSignalQueue.Signal>[1];
+        queue[0] = new Queue<ComponentSignalQueue.Signal>();
+        ImmutableArray<Queue<ComponentSignalQueue.Signal>> queueImm = ImmutableArray.Create(queue);
+        ComponentDictionaries.SignalQueues.Add(ID, new ComponentSignalQueue.Q(queueImm));
+
+        ComponentDictionaries.OutputBuffer.Add(ID, [Input.Inputs[0].State]);
 
         EntityGroups.Wire.Add(ID);
 
@@ -204,9 +221,9 @@ public static class EntityManager
         else
         {
             ComponentDictionaries.Delay.Remove(ID);
-            ComponentDictionaries.SignalQueue.Remove(ID);
             ComponentDictionaries.InputNodes.Remove(ID);
             ComponentDictionaries.InputBuffer.Remove(ID);
+            ComponentDictionaries.SignalQueues.Remove(ID);
             ComponentDictionaries.OutputNodes.Remove(ID);
             ComponentDictionaries.OutputBuffer.Remove(ID);
 

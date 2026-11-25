@@ -1,1 +1,1 @@
-public record ComponentDelay(long Picoseconds = 1);
+public record ComponentDelay(long Picoseconds);

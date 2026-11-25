@@ -1,24 +1,22 @@
 ﻿using System.Collections.Immutable;
 
 Node R = new Node(LogicState.Low);
-Node S = new Node(LogicState.High);
-Node Q = new Node(LogicState.Undefined);
-Node Qn = new Node(LogicState.Undefined);
+Node S = new Node(LogicState.Low);
+Node Q = new Node(LogicState.Low);
+Node Qn = new Node(LogicState.High);
 
 ComponentDelay delay = new ComponentDelay(1);
-ComponentInputs inputs1 = new ComponentInputs(ImmutableArray.Create([R, Qn]));
-ComponentOutputs outputs1 = new ComponentOutputs(ImmutableArray.Create([Q]));
-ComponentInputs inputs2 = new ComponentInputs(ImmutableArray.Create([S, Q]));
-ComponentOutputs outputs2 = new ComponentOutputs(ImmutableArray.Create([Qn]));
+ComponentLogic nor = LogicFunctions.NOR;
 
-EntityManager.CreateLogicDevice(delay, inputs1, outputs1, LogicFunctions.NOR);
-EntityManager.CreateLogicDevice(delay, inputs2, outputs2, LogicFunctions.NOR);
+EntityManager.CreateLogicDevice(delay, new ComponentInputs(ImmutableArray.Create([R, Qn])), new ComponentOutputs(ImmutableArray.Create([Q])), nor);
+EntityManager.CreateLogicDevice(delay, new ComponentInputs(ImmutableArray.Create([S, Q])), new ComponentOutputs(ImmutableArray.Create([Qn])), nor);
 
 Console.WriteLine();
 
 PrintState("Initial state");
 SimulatorSystem.AdvanceByTick(1);
-PrintState("Tick: 1");
+S.State = LogicState.High;
+PrintState("Tick: 1; High S");
 SimulatorSystem.AdvanceByTick(1);
 PrintState("Tick: 2");
 SimulatorSystem.AdvanceByTick(1);
@@ -79,11 +77,6 @@ void SetLogicColor(LogicState LogicValue)
         case LogicState.HighImpedance:
         {
             Console.ForegroundColor = ConsoleColor.DarkGray;
-            break;
-        }
-        case LogicState.Undefined:
-        {
-            Console.ForegroundColor = ConsoleColor.DarkBlue;
             break;
         }
     }
